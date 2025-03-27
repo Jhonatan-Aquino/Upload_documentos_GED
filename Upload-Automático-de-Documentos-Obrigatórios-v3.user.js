@@ -21,7 +21,7 @@
 // - Fazer a rolagem acompanahar o documento que esta sendo inserido
 // - Mudar as classes e ID do html para evitar conflitos com outros Scripts
 // - Exibir a versão embaixo do meu nome e não no titulo
-// - 
+// - Verificar se o arquivo já não esta inserido procurando nos spans span_vGRID_GEDDOCOBRIGID_000X
 
 
 (function() {
