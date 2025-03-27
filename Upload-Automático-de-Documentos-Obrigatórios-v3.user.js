@@ -18,7 +18,7 @@
 (function() {
     'use strict';
 
-    // Estilos CSS personalizados (mantidos os mesmos)
+    // Estilos CSS personalizados (mantidos os mesmos) testando
     GM_addStyle(`
     .botaoSCT {
         background: rgba(0, 113, 235, 0.9);
