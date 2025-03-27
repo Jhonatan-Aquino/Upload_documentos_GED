@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.1
+// @version       4.1.1
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -14,6 +14,15 @@
 // @updateURL     https://raw.githubusercontent.com/Jhonatan-Aquino/Upload_documentos_GED/main/Upload-Automático-de-Documentos-Obrigatórios-v3.user.js
 // @downloadURL   https://raw.githubusercontent.com/Jhonatan-Aquino/Upload_documentos_GED/main/Upload-Automático-de-Documentos-Obrigatórios-v3.user.js
 // ==/UserScript==
+
+
+//ATUALIZAR: 
+// - Baixar o LOG quando ver que ta demorando muito;
+// - Fazer a rolagem acompanahar o documento que esta sendo inserido
+// - Mudar as classes e ID do html para evitar conflitos com outros Scripts
+// - Exibir a versão embaixo do meu nome e não no titulo
+// - 
+
 
 (function() {
     'use strict';
