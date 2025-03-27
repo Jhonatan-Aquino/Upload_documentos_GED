@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.1.1
+// @version       4.1.2
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -100,11 +100,11 @@
     }
        #credito2 {
         background: rgba(214, 214, 214, 0.58);
-        border-radius: 16px;
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(6.6px);
         -webkit-backdrop-filter: blur(6.6px);
         border: 1px solid rgba(214, 214, 214, 0.27);
+        border-radius: 16px;
         color: #000;
         width: auto;
         text-align: center;
