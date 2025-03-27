@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       3.2
+// @version       3.3
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -18,50 +18,53 @@
 (function() {
     'use strict';
 
-    // Estilos CSS personalizados (mantidos os mesmos) testando
+    // Estilos CSS personalizados (mantidos os mesmos)
     GM_addStyle(`
     .botaoSCT {
-        background: rgba(0, 113, 235, 0.9);
-        backdrop-filter: blur(20px);
-        border-radius: 980px;
-        padding: 12px 30px;
-        font-size: 14px;
-        font-weight: 500;
-        color: white;
-        border: none;
-        min-width: 180px;
-        transition: all 0.2s ease-in-out;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        background: #ebebeb;
+        backdrop-filter: blur(6px);
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #087eff;
+        font-size: 12px;
+        font-weight: normal;
+        padding: 9px 20px;
+        min-width: 124.5px;
+        margin: 5px;
+        text-decoration: none;
+        transition: all 0.15s ease-in-out;
     }
     .botaoSCT:hover {
-        background: rgba(0, 113, 235, 1);
+        background: #3982f7;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        color: #fff;
     }
     #fileInput {
         display: none;
     }
-    #fileList {
-        margin: 25px 0;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 12px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(12px);
+     #fileList {
+        max-height: 200px;
+        overflow-y: auto;
+        margin: 20px 0;
+        border: 1px dashed #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        scrollbar-width: none;
     }
     .fileItem {
-        padding: 10px 15px;
-        margin: 5px 0;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        transition: all 0.2s ease;
+        margin: 3px 0;
+        padding: 7px 5px;
+        background: rgba(255,255,255,0.5);
+        border-radius: 5px;
+        font-weight:normal;
+        text-align:left;
     }
-    .fileItem:hover {
-        background: rgba(255, 255, 255, 0.95);
-        transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+    .fileItem.error {
+        background: rgba(255,200,200,0.7);
     }
+
     .divlog {
         background: rgba(244, 244, 244, 0.58);
         border-radius: 16px;
@@ -86,14 +89,24 @@
         line-height: 25px;
         display: none;
     }
-    #credito2 {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        padding: 10px;
-        min-width: 460px !important;
+       #credito2 {
+        background: rgba(214, 214, 214, 0.58);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(6.6px);
+        -webkit-backdrop-filter: blur(6.6px);
+        border: 1px solid rgba(214, 214, 214, 0.27);
+        color: #000;
         width: auto;
+        text-align: center;
+        font-weight: bold;
+        position: fixed;
+        z-index: 2002;
+        padding: 15px;
+        bottom:33px;
+        left: 30px;
+        height: auto;
+        min-width:350px;
     }
     #exibir1 {
         background: rgba(0, 0, 0, 0.8);
@@ -153,28 +166,64 @@
         display: none;
     }
 
+     .progress-container {
+        width: 100%;
+        margin: 10px 0;
+        display: none;
+    }
+
     .progress-bar-wrapper {
+        width: 100%;
         background-color: #f0f0f0;
         border-radius: 10px;
         padding: 3px;
         margin-bottom: 8px;
+        overflow: hidden;
     }
 
     .progress-bar {
-        height: 20px;
+        height: 5px;
         background-color: #4BB543;
         border-radius: 8px;
         width: 0%;
         transition: width 0.5s ease-in-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Efeito de brilho */
+    .progress-bar::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent
+        );
+        animation: glowingEffect 2s infinite linear;
+    }
+
+    @keyframes glowingEffect {
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
     }
 
     .progress-text {
         text-align: center;
-        color: #087eff;
+        color: #474e68;
         font-size: 12px;
-        font-family: Helvetica, Arial, sans-serif !important;
+        font-family: Helvetica, Arial, sans-serif;
         padding: 5px 0;
-        font-weight: normal;
+        font-weight:normal;
     }
 
     .divseletor {
