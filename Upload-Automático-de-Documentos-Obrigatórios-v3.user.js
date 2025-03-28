@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.2
+// @version       4.2.2
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -18,7 +18,6 @@
 
 
 //ATUALIZAR:
-// - Fazer a rolagem acompanahar o documento que esta sendo inserido
 // - Mudar as classes e ID do html para evitar conflitos com outros Scripts
 
 
@@ -38,17 +37,23 @@ window.processamentoEmAndamento = false;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.25);
         color: #087eff;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: normal;
         padding: 9px 20px;
         min-width: 124.5px;
         margin: 5px;
         text-decoration: none;
         transition: all 0.15s ease-in-out;
+        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
     }
-    .botaoSCT:hover {
+    label.botaoSCT {
+        background-color: transparent;
+        color: #3982f7;
+        border: 1px solid #3982f7;
+        box-shadow: none;
+    }
+    label.botaoSCT:hover {
         background: #3982f7;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         transform: scale(1.02);
         color: #fff;
     }
@@ -58,10 +63,22 @@ window.processamentoEmAndamento = false;
     }
     #btnIniciarProcesso:hover {
         background: #3982f7;
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-        transform: scale(1.02);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        opacity:0.9;
         color: #fff;
     }
+
+    #btnDownloadCSV {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #474e68;
+        box-shadow: none;
+    }
+
+    /* Remove efeitos de hover e shadow */
+    #btnDownloadCSV:hover {
+        background-color: #f5f5f5; /* cinza bem claro em vez de azul */
+    }
+
     #fileInput {
         display: none;
     }
@@ -71,7 +88,7 @@ window.processamentoEmAndamento = false;
         margin: 20px 0;
         border: 1px dashed #ccc;
         padding: 10px;
-        border-radius: 5px;
+        border-radius: 10px;
         scrollbar-width: none;
     }
     .fileItem {
@@ -106,17 +123,17 @@ window.processamentoEmAndamento = false;
         color: #087eff;
         font-size: 14px;
         font-weight: normal;
-        font-family: Helvetica, Arial, sans-serif !important;
+        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
         line-height: 25px;
         display: none;
     }
        #credito2 {
-        background: rgba(214, 214, 214, 0.58);
+        background: rgba(220, 220, 220, 0.58);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(6.6px);
         -webkit-backdrop-filter: blur(6.6px);
         border: 1px solid rgba(214, 214, 214, 0.27);
-        border-radius: 16px;
+        border-radius: 20px;
         color: #474e68;
         width: auto;
         text-align: center;
@@ -242,7 +259,7 @@ window.processamentoEmAndamento = false;
         text-align: center;
         color: #474e68;
         font-size: 12px;
-        font-family: Helvetica, Arial, sans-serif;
+        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif;
         padding: 5px 0;
         font-weight:normal;
     }
@@ -265,7 +282,7 @@ window.processamentoEmAndamento = false;
         font-size: 8pt !important;
         color: #86868b;
         line-height: 1.5;
-        margin-bottom: 35px !important;
+        margin-bottom: 20px !important;
     }
 
     .divseletor p em {
@@ -280,7 +297,7 @@ window.processamentoEmAndamento = false;
         max-height: 700px;
         overflow: hidden;
         line-height: 20px;
-        font-family: Helvetica, Arial, sans-serif !important;
+        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
         font-size: 11px;
         font-weight: normal;
         text-align: justify;
@@ -304,7 +321,7 @@ window.processamentoEmAndamento = false;
         border-collapse: separate;
         border-spacing: 0;
         margin: 15px 0;
-        font-family: Helvetica, Arial, sans-serif !important;
+        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
         font-size: 11px;
         border: 1px solid rgba(0, 0, 0, 0.08);
         border-radius: 8px;
@@ -347,42 +364,6 @@ window.processamentoEmAndamento = false;
         transition: background-color 0.3s ease;
     }
 
-    .divseletor {
-        padding: 0;
-        text-align: center;
-    }
-
-    .divseletor h3 {
-        font-size: 28px !important;
-        font-weight: 500 !important;
-        margin-bottom: 15px;
-        color: #1d1d1f;
-        letter-spacing: -0.5px;
-    }
-
-    .divseletor p {
-        font-size: 8pt !important;
-        color: #86868b;
-        line-height: 1.5;
-        margin-bottom: 35px !important;
-    }
-
-    .divseletor p em {
-        color: #2997ff;
-        font-style: normal;
-        font-weight: 500;
-    }
-
-    #btnDownloadCSV {
-        background-color: rgba(255, 255, 255, 0.4);
-        color: #333;
-        box-shadow: none;
-    }
-
-    /* Remove efeitos de hover e shadow */
-    #btnDownloadCSV:hover {
-        background-color: #f5f5f5; /* cinza bem claro em vez de azul */
-    }
 
     // Para garantir que todos os elementos dentro de credito2 herdem a cor
     .credito2 * {
@@ -442,8 +423,8 @@ window.processamentoEmAndamento = false;
                 </g>
             </svg>
             <div class="divseletor">
-                <h3 style="font-size:15pt;font-family: Helvetica, Arial, sans-serif !important;">Upload Automático de Documentos v3</h3>
-                <p style="font-size: 10pt; font-family: Helvetica, Arial, sans-serif !important; font-weight: normal;margin-top: -15px;margin-bottom: 40px;">
+                <h3 style="font-size:15pt;font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important;">Upload Automático de Documentos v3</h3>
+                <p style="font-size: 10pt; font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important; font-weight: normal; margin-top: -15px;margin-bottom: 40px;">
                     Selecione os arquivos para upload!<br>
                     Exemplo: <em>1937175-3.pdf</em>
                 </p>
@@ -459,7 +440,7 @@ window.processamentoEmAndamento = false;
                 </div>
             </div>
             <div class="divajuda">
-                <h3 style="font-size:15pt;text-align:center; line-height: 10px;font-family: Helvetica, Arial, sans-serif !important;">Como usar?</h3>
+                <h3 style="font-size:15pt;text-align:center; line-height: 10px;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;">Como usar?</h3>
 
                 <p><b>1. Preparar os arquivos:</b> Prepare seus arquivos seguindo o padrão de nomenclatura CODIGOALUNO-IDDOCUMENTO.extensão (exemplo: 1937175-3.pdf).</p>
 
@@ -517,9 +498,9 @@ window.processamentoEmAndamento = false;
             </div>
             <div class="credito2" style="color: #474e68;">
                 <div>
-                    <span style='font-size:8pt;font-weight:normal;font-family: Helvetica, Arial, sans-serif !important;'>< Jhonatan Aquino /></span>
+                    <span style='font-size:8pt;font-weight:normal;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'>< Jhonatan Aquino /></span>
                     <br>
-                    <span style='font-size:7pt;color:inherit;font-weight: normal; font-family: Helvetica, Arial, sans-serif !important;'>v${GM_info.script.version}</span>
+                    <span style='font-size:7pt;color:inherit;font-weight: normal; font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'>v${GM_info.script.version}</span>
                 </div>
             </div>
             <svg xmlns="http://www.w3.org/2000/svg" title="Ajuda" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20" height="20" class="btnajuda" id="btnajuda" viewBox="0 0 256 256" style="float:left;margin: -6px;" xml:space="preserve">
@@ -1290,6 +1271,10 @@ window.processamentoEmAndamento = false;
                 } else if (status === 'erro') {
                     item.classList.add('failure');
                 }
+                item.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
                 await esperar(500);
                 break;
             }
