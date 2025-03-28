@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.3
+// @version       4.3.1
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -17,6 +17,7 @@
 
 
 
+
 // No início do seu script (fora de qualquer função)
 window.arquivosPendentes = [];
 window.processamentoEmAndamento = false;
@@ -26,7 +27,7 @@ window.processamentoEmAndamento = false;
 
     // Estilos CSS personalizados (mantidos os mesmos) TESTANDO A VERSAO 4.0
     GM_addStyle(`
-    #credito2 .botaoUAD {
+    #creditoUAD .botaoUAD {
         background: #ebebeb;
         backdrop-filter: blur(6px);
         border-radius: 20px;
@@ -42,43 +43,43 @@ window.processamentoEmAndamento = false;
         transition: all 0.15s ease-in-out;
         font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
     }
-   #credito2 label.botaoUAD {
+   #creditoUAD label.botaoUAD {
         background-color: transparent;
         color: #3982f7;
         border: 1px solid #3982f7;
         box-shadow: none;
     }
-   #credito2 label.botaoUAD:hover {
+   #creditoUAD label.botaoUAD:hover {
         background: #3982f7;
         transform: scale(1.02);
         color: #fff;
     }
-   #credito2 #btnIniciarProcesso {
+   #creditoUAD #btnIniciarProcesso {
         background: #3982f7;
         color: #fff;
     }
-  #credito2  #btnIniciarProcesso:hover {
+  #creditoUAD  #btnIniciarProcesso:hover {
         background: #3982f7;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         opacity:0.9;
         color: #fff;
     }
 
-   #credito2 #btnDownloadCSV {
+   #creditoUAD #btnDownloadCSV {
         background-color: rgba(255, 255, 255, 0.2);
         color: #474e68;
         box-shadow: none;
     }
 
     /* Remove efeitos de hover e shadow */
-  #credito2  #btnDownloadCSV:hover {
+  #creditoUAD  #btnDownloadCSV:hover {
         background-color: #f5f5f5; /* cinza bem claro em vez de azul */
     }
 
-  #credito2  #fileInput {
+  #creditoUAD  #fileInput {
         display: none;
     }
-  #credito2   #fileList {
+  #creditoUAD   #fileList {
         max-height: 200px;
         overflow-y: auto;
         margin: 20px 0;
@@ -87,7 +88,7 @@ window.processamentoEmAndamento = false;
         border-radius: 10px;
         scrollbar-width: none;
     }
-  #credito2  .fileItem {
+  #creditoUAD  .fileItem {
         margin: 3px 0;
         padding: 7px 5px;
         background: rgba(255,255,255,0.5);
@@ -95,11 +96,11 @@ window.processamentoEmAndamento = false;
         font-weight:normal;
         text-align:left;
     }
-  #credito2  .fileItem.error {
+  #creditoUAD  .fileItem.error {
         background: rgba(255,200,200,0.7);
     }
 
-   #credito2 .divlog {
+   #creditoUAD .divlog {
         background: rgba(244, 244, 244, 0.58);
         border-radius: 16px;
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0);
@@ -123,7 +124,7 @@ window.processamentoEmAndamento = false;
         line-height: 25px;
         display: none;
     }
-    #credito2 {
+    #creditoUAD {
         background: rgba(220, 220, 220, 0.58);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(6.6px);
@@ -142,17 +143,17 @@ window.processamentoEmAndamento = false;
         height: auto;
         min-width:350px;
     }
-    #exibir1 {
+    #exibirUAD {
         background: rgba(0, 0, 0, 0.8);
         backdrop-filter: blur(20px);
         font-weight: 500;
         letter-spacing: 0.3px;
         padding: 5px 15px;
     }
-    #exibir1:hover {
+    #exibirUAD:hover {
         background: rgba(0, 0, 0, 0.9);
     }
-   #credito2 #loadingBtn {
+   #creditoUAD #loadingBtn {
         position: relative;
         padding: 15px 20px;
         font-size: 14px;
@@ -166,7 +167,7 @@ window.processamentoEmAndamento = false;
         margin-top: 10px;
         display: none; /* Inicialmente oculto */
     }
-   #credito2 #loadingBtn.loading::after {
+   #creditoUAD #loadingBtn.loading::after {
         content: "";
         position: absolute;
         width: 56px;
@@ -183,7 +184,7 @@ window.processamentoEmAndamento = false;
         from { transform: translate(-50%, -50%) rotate(0deg); }
         to { transform: translate(-50%, -50%) rotate(360deg); }
     }
-  #credito2  #uploadFrame {
+  #creditoUAD  #uploadFrame {
         width: 1200px;
         height: 900px;
         border: none;
@@ -194,19 +195,19 @@ window.processamentoEmAndamento = false;
         display: none;
         visibility: hidden;
     }
-  #credito2  #progressArea {
+  #creditoUAD  #progressArea {
         width: 100%;
         margin: 10px 0;
         display: none;
     }
 
-   #credito2  .progress-container {
+   #creditoUAD  .progress-container {
         width: 100%;
         margin: 10px 0;
         display: none;
     }
 
-  #credito2  .progress-bar-wrapper {
+  #creditoUAD  .progress-bar-wrapper {
         width: 100%;
         background-color: #f0f0f0;
         border-radius: 10px;
@@ -215,7 +216,7 @@ window.processamentoEmAndamento = false;
         overflow: hidden;
     }
 
-   #credito2 .progress-bar {
+   #creditoUAD .progress-bar {
         height: 5px;
         background-color: #4BB543;
         border-radius: 8px;
@@ -226,7 +227,7 @@ window.processamentoEmAndamento = false;
     }
 
     /* Efeito de brilho */
-  #credito2  .progress-bar::after {
+  #creditoUAD  .progress-bar::after {
         content: "";
         position: absolute;
         top: 0;
@@ -251,7 +252,7 @@ window.processamentoEmAndamento = false;
         }
     }
 
-   #credito2 .progress-text {
+   #creditoUAD .progress-text {
         text-align: center;
         color: #474e68;
         font-size: 12px;
@@ -260,13 +261,13 @@ window.processamentoEmAndamento = false;
         font-weight:normal;
     }
 
-   #credito2 .divseletor {
+   #creditoUAD .divseletor {
         padding: 0;
         text-align: center;
         min-width: 460px;
     }
 
-   #credito2 .divseletor h3 {
+   #creditoUAD .divseletor h3 {
         font-size: 28px !important;
         font-weight: 500 !important;
         margin-bottom: 15px;
@@ -274,20 +275,20 @@ window.processamentoEmAndamento = false;
         letter-spacing: -0.5px;
     }
 
-    #credito2 .divseletor p {
+    #creditoUAD .divseletor p {
         font-size: 8pt !important;
         color: #86868b;
         line-height: 1.5;
         margin-bottom: 20px !important;
     }
 
-  #credito2  .divseletor p em {
+  #creditoUAD  .divseletor p em {
         color: #2997ff;
         font-style: normal;
         font-weight: 500;
     }
 
-   #credito2 .divajuda {
+   #creditoUAD .divajuda {
         display: none;
         max-width: 460px;
         max-height: 700px;
@@ -299,20 +300,20 @@ window.processamentoEmAndamento = false;
         text-align: justify;
     }
 
-  #credito2  svg:hover path {
+  #creditoUAD  svg:hover path {
         fill: #087dff !important;
     }
 
-   #credito2 .btnscontrole {
+   #creditoUAD .btnscontrole {
         cursor: pointer;
         transition: all 0.2s ease-in-out;
     }
 
- #credito2   .btnscontrole:hover path {
+ #creditoUAD   .btnscontrole:hover path {
         fill: #087dff !important;
     }
 
-  #credito2  .tabela-docs {
+  #creditoUAD  .tabela-docs {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -324,38 +325,38 @@ window.processamentoEmAndamento = false;
         overflow: hidden;
     }
 
-  #credito2  .tabela-docs td {
+  #creditoUAD  .tabela-docs td {
         padding: 8px 10px;
         vertical-align: top;
         line-height: 1.4;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-  #credito2  .tabela-docs tr:last-child td {
+  #creditoUAD  .tabela-docs tr:last-child td {
         border-bottom: none;
     }
 
-   #credito2 .tabela-docs td:first-child {
+   #creditoUAD .tabela-docs td:first-child {
         width: 30px;
         text-align: right;
         color: #666;
         font-weight: normal;
     }
 
-  #credito2  .tabela-docs tr:nth-child(even) {
+  #creditoUAD  .tabela-docs tr:nth-child(even) {
         background-color: rgba(0, 0, 0, 0.01);
     }
 
-  #credito2  .tabela-docs tr:hover {
+  #creditoUAD  .tabela-docs tr:hover {
         background-color: rgba(0, 0, 0, 0.02);
     }
 
- #credito2   .fileItem.success {
+ #creditoUAD   .fileItem.success {
         background: rgb(126, 213, 126) !important;
         transition: background-color 0.3s ease;
     }
 
-  #credito2  .fileItem.failure {
+  #creditoUAD  .fileItem.failure {
         background: rgb(227, 122, 122) !important;
         transition: background-color 0.3s ease;
     }
@@ -364,7 +365,7 @@ window.processamentoEmAndamento = false;
     // Função para criar a interface do usuário
     function criarInterface() {
         // Primeiro, remover quaisquer instâncias existentes
-        const elementosExistentes = document.querySelectorAll('#credito2, #exibir1');
+        const elementosExistentes = document.querySelectorAll('#creditoUAD, #exibirUAD');
         elementosExistentes.forEach(el => el.remove());
 
         console.log('Criando interface...'); // Debug
@@ -372,7 +373,7 @@ window.processamentoEmAndamento = false;
         // Criar o botão
         const btnExibir = document.createElement('input');
         btnExibir.type = 'button';
-        btnExibir.id = 'exibir1';
+        btnExibir.id = 'exibirUAD';
         btnExibir.className = 'menuSCT';
         btnExibir.style.backgroundColor = "#474e68";
         btnExibir.style.color = "#ffffff";
@@ -394,7 +395,7 @@ window.processamentoEmAndamento = false;
 
         // Criar div principal
         const divCredit = document.createElement('div');
-        divCredit.id = 'credito2';
+        divCredit.id = 'creditoUAD';
         divCredit.className = 'menuSCT';
 
         // Configurar conteúdo
@@ -481,7 +482,7 @@ window.processamentoEmAndamento = false;
                 - Em caso de erro, verifique a mensagem no log<br>
                 - O relatório final mostrará detalhes de cada upload</p>
             </div>
-            <div class="credito2" style="color: #474e68;">
+            <div class="creditoUAD" style="color: #474e68;">
                 <div>
                     <span style='font-size:8pt;font-weight:normal;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'><a href="https://github.com/Jhonatan-Aquino/" target="_blank" style="text-color:rgb(71, 78, 104) !important;  text-decoration: none !important;">< Jhonatan Aquino /></a></span>
                     <br>
@@ -507,14 +508,14 @@ window.processamentoEmAndamento = false;
         btnExibir.onmouseout = () => btnExibir.style.backgroundColor = "#474e68";
         btnExibir.onclick = function() {
             const novoEstado = this.value === "MINIMIZAR" ? "fechado" : "aberto";
-            $("#credito2").slideToggle();
+            $("#creditoUAD").slideToggle();
             this.value = novoEstado === "fechado" ? "ABRIR | Upload de documentos" : "MINIMIZAR";
             setCookie('estadoMenu', novoEstado, 30);
         };
 
         // Configurar visibilidade inicial
         if (estadoSalvo === 'fechado') {
-            $("#credito2").hide();
+            $("#creditoUAD").hide();
         }
 
         // Adicionar eventos da ajuda
