@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.2.2
+// @version       4.3
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -17,10 +17,6 @@
 
 
 
-//ATUALIZAR:
-// - Mudar as classes e ID do html para evitar conflitos com outros Scripts
-
-
 // No início do seu script (fora de qualquer função)
 window.arquivosPendentes = [];
 window.processamentoEmAndamento = false;
@@ -30,7 +26,7 @@ window.processamentoEmAndamento = false;
 
     // Estilos CSS personalizados (mantidos os mesmos) TESTANDO A VERSAO 4.0
     GM_addStyle(`
-    .botaoSCT {
+    #credito2 .botaoUAD {
         background: #ebebeb;
         backdrop-filter: blur(6px);
         border-radius: 20px;
@@ -46,43 +42,43 @@ window.processamentoEmAndamento = false;
         transition: all 0.15s ease-in-out;
         font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
     }
-    label.botaoSCT {
+   #credito2 label.botaoUAD {
         background-color: transparent;
         color: #3982f7;
         border: 1px solid #3982f7;
         box-shadow: none;
     }
-    label.botaoSCT:hover {
+   #credito2 label.botaoUAD:hover {
         background: #3982f7;
         transform: scale(1.02);
         color: #fff;
     }
-    #btnIniciarProcesso {
+   #credito2 #btnIniciarProcesso {
         background: #3982f7;
         color: #fff;
     }
-    #btnIniciarProcesso:hover {
+  #credito2  #btnIniciarProcesso:hover {
         background: #3982f7;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         opacity:0.9;
         color: #fff;
     }
 
-    #btnDownloadCSV {
+   #credito2 #btnDownloadCSV {
         background-color: rgba(255, 255, 255, 0.2);
         color: #474e68;
         box-shadow: none;
     }
 
     /* Remove efeitos de hover e shadow */
-    #btnDownloadCSV:hover {
+  #credito2  #btnDownloadCSV:hover {
         background-color: #f5f5f5; /* cinza bem claro em vez de azul */
     }
 
-    #fileInput {
+  #credito2  #fileInput {
         display: none;
     }
-     #fileList {
+  #credito2   #fileList {
         max-height: 200px;
         overflow-y: auto;
         margin: 20px 0;
@@ -91,7 +87,7 @@ window.processamentoEmAndamento = false;
         border-radius: 10px;
         scrollbar-width: none;
     }
-    .fileItem {
+  #credito2  .fileItem {
         margin: 3px 0;
         padding: 7px 5px;
         background: rgba(255,255,255,0.5);
@@ -99,11 +95,11 @@ window.processamentoEmAndamento = false;
         font-weight:normal;
         text-align:left;
     }
-    .fileItem.error {
+  #credito2  .fileItem.error {
         background: rgba(255,200,200,0.7);
     }
 
-    .divlog {
+   #credito2 .divlog {
         background: rgba(244, 244, 244, 0.58);
         border-radius: 16px;
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0);
@@ -127,7 +123,7 @@ window.processamentoEmAndamento = false;
         line-height: 25px;
         display: none;
     }
-       #credito2 {
+    #credito2 {
         background: rgba(220, 220, 220, 0.58);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(6.6px);
@@ -156,7 +152,7 @@ window.processamentoEmAndamento = false;
     #exibir1:hover {
         background: rgba(0, 0, 0, 0.9);
     }
-    #loadingBtn {
+   #credito2 #loadingBtn {
         position: relative;
         padding: 15px 20px;
         font-size: 14px;
@@ -170,7 +166,7 @@ window.processamentoEmAndamento = false;
         margin-top: 10px;
         display: none; /* Inicialmente oculto */
     }
-    #loadingBtn.loading::after {
+   #credito2 #loadingBtn.loading::after {
         content: "";
         position: absolute;
         width: 56px;
@@ -187,7 +183,7 @@ window.processamentoEmAndamento = false;
         from { transform: translate(-50%, -50%) rotate(0deg); }
         to { transform: translate(-50%, -50%) rotate(360deg); }
     }
-    #uploadFrame {
+  #credito2  #uploadFrame {
         width: 1200px;
         height: 900px;
         border: none;
@@ -198,19 +194,19 @@ window.processamentoEmAndamento = false;
         display: none;
         visibility: hidden;
     }
-    #progressArea {
+  #credito2  #progressArea {
         width: 100%;
         margin: 10px 0;
         display: none;
     }
 
-     .progress-container {
+   #credito2  .progress-container {
         width: 100%;
         margin: 10px 0;
         display: none;
     }
 
-    .progress-bar-wrapper {
+  #credito2  .progress-bar-wrapper {
         width: 100%;
         background-color: #f0f0f0;
         border-radius: 10px;
@@ -219,7 +215,7 @@ window.processamentoEmAndamento = false;
         overflow: hidden;
     }
 
-    .progress-bar {
+   #credito2 .progress-bar {
         height: 5px;
         background-color: #4BB543;
         border-radius: 8px;
@@ -230,7 +226,7 @@ window.processamentoEmAndamento = false;
     }
 
     /* Efeito de brilho */
-    .progress-bar::after {
+  #credito2  .progress-bar::after {
         content: "";
         position: absolute;
         top: 0;
@@ -255,7 +251,7 @@ window.processamentoEmAndamento = false;
         }
     }
 
-    .progress-text {
+   #credito2 .progress-text {
         text-align: center;
         color: #474e68;
         font-size: 12px;
@@ -264,13 +260,13 @@ window.processamentoEmAndamento = false;
         font-weight:normal;
     }
 
-    .divseletor {
+   #credito2 .divseletor {
         padding: 0;
         text-align: center;
         min-width: 460px;
     }
 
-    .divseletor h3 {
+   #credito2 .divseletor h3 {
         font-size: 28px !important;
         font-weight: 500 !important;
         margin-bottom: 15px;
@@ -278,20 +274,20 @@ window.processamentoEmAndamento = false;
         letter-spacing: -0.5px;
     }
 
-    .divseletor p {
+    #credito2 .divseletor p {
         font-size: 8pt !important;
         color: #86868b;
         line-height: 1.5;
         margin-bottom: 20px !important;
     }
 
-    .divseletor p em {
+  #credito2  .divseletor p em {
         color: #2997ff;
         font-style: normal;
         font-weight: 500;
     }
 
-    .divajuda {
+   #credito2 .divajuda {
         display: none;
         max-width: 460px;
         max-height: 700px;
@@ -303,20 +299,20 @@ window.processamentoEmAndamento = false;
         text-align: justify;
     }
 
-    svg:hover path {
+  #credito2  svg:hover path {
         fill: #087dff !important;
     }
 
-    .btnscontrole {
+   #credito2 .btnscontrole {
         cursor: pointer;
         transition: all 0.2s ease-in-out;
     }
 
-    .btnscontrole:hover path {
+ #credito2   .btnscontrole:hover path {
         fill: #087dff !important;
     }
 
-    .tabela-docs {
+  #credito2  .tabela-docs {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
@@ -328,51 +324,40 @@ window.processamentoEmAndamento = false;
         overflow: hidden;
     }
 
-    .tabela-docs td {
+  #credito2  .tabela-docs td {
         padding: 8px 10px;
         vertical-align: top;
         line-height: 1.4;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    .tabela-docs tr:last-child td {
+  #credito2  .tabela-docs tr:last-child td {
         border-bottom: none;
     }
 
-    .tabela-docs td:first-child {
+   #credito2 .tabela-docs td:first-child {
         width: 30px;
         text-align: right;
         color: #666;
         font-weight: normal;
     }
 
-    .tabela-docs tr:nth-child(even) {
+  #credito2  .tabela-docs tr:nth-child(even) {
         background-color: rgba(0, 0, 0, 0.01);
     }
 
-    .tabela-docs tr:hover {
+  #credito2  .tabela-docs tr:hover {
         background-color: rgba(0, 0, 0, 0.02);
     }
 
-    .fileItem.success {
+ #credito2   .fileItem.success {
         background: rgb(126, 213, 126) !important;
         transition: background-color 0.3s ease;
     }
 
-    .fileItem.failure {
+  #credito2  .fileItem.failure {
         background: rgb(227, 122, 122) !important;
         transition: background-color 0.3s ease;
-    }
-
-
-    // Para garantir que todos os elementos dentro de credito2 herdem a cor
-    .credito2 * {
-        color: #474e68 !important;
-    }
-
-    // Se houver spans ou outros elementos específicos que precisem manter a cor
-    .credito2 span[style*="color"] {
-        color: inherit !important;
     }
     `);
 
@@ -423,15 +408,15 @@ window.processamentoEmAndamento = false;
                 </g>
             </svg>
             <div class="divseletor">
-                <h3 style="font-size:15pt;font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important;">Upload Automático de Documentos v3</h3>
+                <h3 style="font-size:15pt;font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important;">Upload Automático de Documentos</h3>
                 <p style="font-size: 10pt; font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important; font-weight: normal; margin-top: -15px;margin-bottom: 40px;">
                     Selecione os arquivos para upload!<br>
                     Exemplo: <em>1937175-3.pdf</em>
                 </p>
                 <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp">
-                <label for="fileInput" class="botaoSCT" style="cursor:pointer;">Selecionar Arquivos</label>
+                <label for="fileInput" class="botaoUAD" style="cursor:pointer;">Selecionar Arquivos</label>
                 <div id="fileList"></div>
-                <input type='button' id='btnIniciarProcesso' value='Iniciar Upload' class='botaoSCT' style='display:none;'>
+                <input type='button' id='btnIniciarProcesso' value='Iniciar Upload' class='botaoUAD' style='display:none;'>
                 <div id="progressArea">
                     <div class="progress-bar-wrapper">
                         <div class="progress-bar"></div>
@@ -442,7 +427,7 @@ window.processamentoEmAndamento = false;
             <div class="divajuda">
                 <h3 style="font-size:15pt;text-align:center; line-height: 10px;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;">Como usar?</h3>
 
-                <p><b>1. Preparar os arquivos:</b> Prepare seus arquivos seguindo o padrão de nomenclatura CODIGOALUNO-IDDOCUMENTO.extensão (exemplo: 1937175-3.pdf).</p>
+                <p><b>1. Preparar os arquivos:</b> Prepare seus arquivos seguindo o padrão de nomenclatura CODIGOALUNO-IDDOCUMENTO.extensão (exemplo: 1937175-3.pdf). <em>Dica: O aplicativo <a href="https://www.naps2.com/" target="_blank" style="text-color:rgb(71, 78, 104) !important;  text-decoration: underline !important;">NAPS2</a> é excelente para este fluxo de digitalização de documentos.</em></p>
 
                 <p><b>2. IDs dos documentos:</b></p>
                 <table class="tabela-docs">
@@ -498,7 +483,7 @@ window.processamentoEmAndamento = false;
             </div>
             <div class="credito2" style="color: #474e68;">
                 <div>
-                    <span style='font-size:8pt;font-weight:normal;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'>< Jhonatan Aquino /></span>
+                    <span style='font-size:8pt;font-weight:normal;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'><a href="https://github.com/Jhonatan-Aquino/" target="_blank" style="text-color:rgb(71, 78, 104) !important;  text-decoration: none !important;">< Jhonatan Aquino /></a></span>
                     <br>
                     <span style='font-size:7pt;color:inherit;font-weight: normal; font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'>v${GM_info.script.version}</span>
                 </div>
@@ -880,7 +865,7 @@ window.processamentoEmAndamento = false;
             btnDownload.id = 'btnDownloadCSV';
             btnDownload.innerHTML = 'Baixar Relatório CSV';
             btnDownload.className = 'btn-download-csv';
-            btnDownload.className = 'botaoSCT';
+            btnDownload.className = 'botaoUAD';
 
 
 
