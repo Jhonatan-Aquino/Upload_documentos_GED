@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.1.2
+// @version       4.2
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -16,13 +16,15 @@
 // ==/UserScript==
 
 
-//ATUALIZAR: 
-// - Baixar o LOG quando ver que ta demorando muito;
+
+//ATUALIZAR:
 // - Fazer a rolagem acompanahar o documento que esta sendo inserido
 // - Mudar as classes e ID do html para evitar conflitos com outros Scripts
-// - Exibir a versão embaixo do meu nome e não no titulo
-// - Verificar se o arquivo já não esta inserido procurando nos spans span_vGRID_GEDDOCOBRIGID_000X
 
+
+// No início do seu script (fora de qualquer função)
+window.arquivosPendentes = [];
+window.processamentoEmAndamento = false;
 
 (function() {
     'use strict';
@@ -45,6 +47,16 @@
         transition: all 0.15s ease-in-out;
     }
     .botaoSCT:hover {
+        background: #3982f7;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        transform: scale(1.02);
+        color: #fff;
+    }
+    #btnIniciarProcesso {
+        background: #3982f7;
+        color: #fff;
+    }
+    #btnIniciarProcesso:hover {
         background: #3982f7;
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
         transform: scale(1.02);
@@ -105,7 +117,7 @@
         -webkit-backdrop-filter: blur(6.6px);
         border: 1px solid rgba(214, 214, 214, 0.27);
         border-radius: 16px;
-        color: #000;
+        color: #474e68;
         width: auto;
         text-align: center;
         font-weight: bold;
@@ -360,6 +372,27 @@
         font-style: normal;
         font-weight: 500;
     }
+
+    #btnDownloadCSV {
+        background-color: rgba(255, 255, 255, 0.4);
+        color: #333;
+        box-shadow: none;
+    }
+
+    /* Remove efeitos de hover e shadow */
+    #btnDownloadCSV:hover {
+        background-color: #f5f5f5; /* cinza bem claro em vez de azul */
+    }
+
+    // Para garantir que todos os elementos dentro de credito2 herdem a cor
+    .credito2 * {
+        color: #474e68 !important;
+    }
+
+    // Se houver spans ou outros elementos específicos que precisem manter a cor
+    .credito2 span[style*="color"] {
+        color: inherit !important;
+    }
     `);
 
     // Função para criar a interface do usuário
@@ -482,7 +515,13 @@
                 - Em caso de erro, verifique a mensagem no log<br>
                 - O relatório final mostrará detalhes de cada upload</p>
             </div>
-            <div><span style='font-size:8pt;font-weight:normal;font-family: Helvetica, Arial, sans-serif !important;'>< Jhonatan Aquino /></span></div>
+            <div class="credito2" style="color: #474e68;">
+                <div>
+                    <span style='font-size:8pt;font-weight:normal;font-family: Helvetica, Arial, sans-serif !important;'>< Jhonatan Aquino /></span>
+                    <br>
+                    <span style='font-size:7pt;color:inherit;font-weight: normal; font-family: Helvetica, Arial, sans-serif !important;'>v${GM_info.script.version}</span>
+                </div>
+            </div>
             <svg xmlns="http://www.w3.org/2000/svg" title="Ajuda" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20" height="20" class="btnajuda" id="btnajuda" viewBox="0 0 256 256" style="float:left;margin: -6px;" xml:space="preserve">
                 <defs></defs>
                 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
@@ -536,6 +575,9 @@
 
         // Revinculando todos os eventos necessários
         document.getElementById('fileInput').addEventListener('change', function(e) {
+
+            resetarSistema();
+
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '';
             arquivosParaProcessar = [];
@@ -809,91 +851,174 @@
         }
     }
 
-    // Função para processar o próximo arquivo
-    function processarProximoArquivo() {
+    function verificarDocumentoExistente(docId) {
+        // Procura por todos os spans que contêm os IDs dos documentos
+        const spans = document.querySelectorAll('[id^="span_vGRID_GEDDOCOBRIGID_"]');
+
+        for (const span of spans) {
+            // Remove espaços em branco e compara os IDs
+            const idExistente = span.textContent.trim();
+            if (idExistente === docId.toString()) {
+                // Encontrou um documento com o mesmo ID
+                const row = span.closest('tr');
+                const nomeSpan = row.querySelector('[id^="span_vGRID_GEDDOCOBRIGARQUIVONOME_"]');
+                const tipoSpan = row.querySelector('[id^="span_vGRID_GEDDOCOBRIGDSC_"]');
+
+                return {
+                    existe: true,
+                    nomeArquivo: nomeSpan ? nomeSpan.textContent.trim() : 'Nome não encontrado',
+                    tipoDocumento: tipoSpan ? tipoSpan.textContent.trim() : 'Tipo não encontrado'
+                };
+            }
+        }
+
+        return { existe: false };
+    }
+
+    // Modificação na função processarProximoArquivo
+    async function processarProximoArquivo() {
+        if (!arquivosParaProcessar || !Array.isArray(arquivosParaProcessar) || arquivosParaProcessar.length === 0) {
+            exibirLog('Nenhum arquivo para processar', CONFIG.TEMPO_ESPERA_ERRO, '#FF4B40');
+            $('.btnajuda').fadeIn(500);
+            return;
+        }
+
         if (currentFileIndex >= arquivosParaProcessar.length) {
-            exibirLog('Processo concluído para todos os arquivos!', 5000, '#4BB543');
-            atualizarProgresso(100, 'Processo concluído');
-            isProcessing = false;
+            const progressoFinal = 100;
+            atualizarProgresso(progressoFinal, 'Processo concluído!');
+            exibirLog('Todos os arquivos foram processados!', CONFIG.TEMPO_ESPERA_PADRAO, '#4CAF50');
+            $('.btnajuda').fadeIn(500);
+            // Remover botão anterior se existir
+            const botaoAnterior = document.getElementById('btnDownloadCSV');
+            if (botaoAnterior) {
+                botaoAnterior.remove();
+            }
 
-            setTimeout(() => {
-                $('.btnajuda').fadeIn(500);
-                criarBotaoExportacao();
-            }, 1000);
+            // Criar novo botão
+            const btnDownload = document.createElement('button');
+            btnDownload.id = 'btnDownloadCSV';
+            btnDownload.innerHTML = 'Baixar Relatório CSV';
+            btnDownload.className = 'btn-download-csv';
+            btnDownload.className = 'botaoSCT';
 
+
+
+            // Inserir após o fileList
+            const fileList = document.getElementById('fileList');
+            if (fileList) {
+                fileList.insertAdjacentElement('afterend', btnDownload);
+            }
+
+            // Adicionar evento de click que chama exportarCSV
+            btnDownload.addEventListener('click', exportarCSV);
+
+            finalizarProcesso(null, false);
             return;
         }
 
         const fileInfo = arquivosParaProcessar[currentFileIndex];
-        const progresso = Math.round((currentFileIndex / arquivosParaProcessar.length) * 100);
-        atualizarProgresso(progresso, `Processando: ${fileInfo.fileName}`);
-
-        abrirPaginaAluno(fileInfo);
-    }
-
-    // Função para criar botão de exportação
-    function criarBotaoExportacao() {
-        // Remover botão existente se houver
-        $('.botao-exportar').remove();
-
-        const btnExportar = $('<input>', {
-            type: 'button',
-            value: 'Exportar LOG (CSV)',
-            class: 'botaoSCT botao-exportar',
-            css: {
-                marginBottom: '15px'
-            },
-            click: exportarCSV
-        });
-
-        // Inserir antes do último elemento da divseletor
-        const divSeletor = $('.divseletor');
-        if (divSeletor.length) {
-            btnExportar.insertBefore(divSeletor.children().last());
-            btnExportar.hide().fadeIn(500);
+        if (!fileInfo || !fileInfo.fileName || !fileInfo.docId) {
+            exibirLog(`Arquivo inválido no índice ${currentFileIndex}`, CONFIG.TEMPO_ESPERA_ERRO, '#FF4B40');
+            currentFileIndex++;
+            setTimeout(processarProximoArquivo, CONFIG.TEMPO_ESPERA_PROXIMO_ARQUIVO);
+            return;
         }
+
+        const progressoAtual = Math.round(((currentFileIndex + 1) / arquivosParaProcessar.length) * 100);
+        atualizarProgresso(progressoAtual, `Processando: ${fileInfo.fileName}`);
+
+        try {
+            const iframe = await abrirPaginaAluno(fileInfo.codAluno);
+            await enviarDocumento(iframe, fileInfo);
+        } catch (error) {
+            console.error('Erro ao processar arquivo:', error);
+            exibirLog(error.message, CONFIG.TEMPO_ESPERA_ERRO, '#FF4B40');
+        }
+
+        currentFileIndex++;
+        setTimeout(processarProximoArquivo, CONFIG.TEMPO_ESPERA_PROXIMO_ARQUIVO);
     }
+
 
     // Função para abrir a página do aluno
-    function abrirPaginaAluno(fileInfo) {
-        if (currentIframe && currentIframe.parentNode) {
-            currentIframe.parentNode.removeChild(currentIframe);
-        }
+    async function abrirPaginaAluno(codAluno) {
+        return new Promise((resolve, reject) => {
+            try {
+                // Criar o iframe se não existir
+                let currentIframe = document.querySelector('#iframeGED');
+                if (!currentIframe) {
+                    currentIframe = document.createElement('iframe');
+                    currentIframe.id = 'iframeGED';
+                    currentIframe.style.display = 'none';
+                    document.body.appendChild(currentIframe);
+                }
 
-        currentIframe = document.createElement('iframe');
-        currentIframe.id = 'uploadFrame';
-        currentIframe.style.display = 'none';
-        currentIframe.style.visibility = 'hidden';
-        document.body.appendChild(currentIframe);
+                const url = `http://sigeduca.seduc.mt.gov.br/ged/hwtmgedaluno2.aspx?${codAluno},,HWMConAluno,UPD,1,0,1`;
+                currentIframe.src = url;
 
-        const url = `http://sigeduca.seduc.mt.gov.br/ged/hwtmgedaluno2.aspx?${fileInfo.codAluno},,HWMConAluno,UPD,1,0,1`;
-        currentIframe.src = url;
+                currentIframe.onload = () => {
+                    resolve(currentIframe);
+                };
 
-        currentIframe.onload = function() {
-            setTimeout(() => {
-                enviarDocumento(currentIframe, fileInfo);
-            }, 3000);
-        };
+                currentIframe.onerror = () => {
+                    reject(new Error('Erro ao carregar página do aluno'));
+                };
+
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
 
     // Função principal de envio do documento atualizada
     async function enviarDocumento(iframe, fileInfo) {
         const docFrame = iframe.contentDocument || iframe.contentWindow.document;
-        const timeout = setTimeout(() => {
-            registrarLog(
-                fileInfo.fileName,
-                tiposDocumentos[fileInfo.docId],
-                'erro',
-                'Tempo total de processamento excedido'
-            );
-            throw new Error('Tempo total de processamento excedido');
-        }, CONFIG.TIMEOUT_TOTAL);
+
+        // Aguardar um pouco para garantir que a página carregou completamente
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         try {
-            const validacao = validarArquivo(fileInfo.file, fileInfo);
-            if (!validacao.valido) {
-                throw new Error(validacao.erros.join('\n'));
+            // Verificar se o documento já existe na tabela do iframe
+            const spans = docFrame.querySelectorAll('[id^="span_vGRID_GEDDOCOBRIGID_"]');
+            console.log(`Verificando documento ${fileInfo.docId} - Encontrados ${spans.length} documentos na tabela`);
+
+            for (const span of spans) {
+                const idExistente = span.textContent.trim();
+                console.log(`Comparando ${idExistente} com ${fileInfo.docId}`);
+
+                if (idExistente === fileInfo.docId.toString()) {
+                    // Encontrou documento já inserido
+                    const row = span.closest('tr');
+                    const nomeSpan = row.querySelector('[id^="span_vGRID_GEDDOCOBRIGARQUIVONOME_"]');
+                    const nomeExistente = nomeSpan ? nomeSpan.textContent.trim() : 'Nome não encontrado';
+
+                    const mensagem = `Documento já inserido anteriormente como: ${nomeExistente}`;
+                    console.log(mensagem);
+
+                    // Registrar no log e marcar como falha
+                    registrarLog(
+                        fileInfo.fileName,
+                        tiposDocumentos[fileInfo.docId],
+                        'erro',
+                        mensagem
+                    );
+
+                    const listItem = document.querySelector(`#file-${currentFileIndex}`);
+                    if (listItem) {
+                        listItem.classList.add('failure');
+                    }
+
+                    // Aguardar 1 segundo antes de finalizar
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    // Finalizar sem exportar CSV
+                    finalizarProcesso(iframe, false);
+                    return;
+                }
             }
+
+            // Se chegou aqui, o documento não existe e pode continuar com o upload
+            await validarArquivo(fileInfo.file, fileInfo);
 
             const selectTipoDoc = docFrame.getElementById('vGEDDOCOBRIGID');
             if (!selectTipoDoc) {
@@ -988,6 +1113,19 @@
                     break;
                 }
 
+                if (tentativas === Math.floor(CONFIG.MAX_TENTATIVAS_PROCESSAMENTO * 0.8)) {
+                    // Quando atingir 80% do tempo máximo, avisar e exportar logs
+                    if (!timeoutWarningTriggered) {
+                        timeoutWarningTriggered = true;
+                        exibirLog('Processamento está demorando muito. Exportando logs por precaução...', 5000, '#FFA500');
+                        try {
+                            exportarCSV();
+                        } catch (error) {
+                            console.error('Erro ao exportar CSV:', error);
+                        }
+                    }
+                }
+
                 await esperar(1000);
                 tentativas++;
 
@@ -1001,15 +1139,23 @@
             }
 
             await esperar(2000);
-            clearTimeout(timeout);
             finalizarProcesso(iframe, false);
 
         } catch (error) {
+            if (!timeoutWarningTriggered) {
+                // Se ainda não exportamos o CSV, fazer isso agora
+                exibirLog('Erro no processamento. Exportando logs...', 5000, '#FFA500');
+                try {
+                    exportarCSV();
+                } catch (exportError) {
+                    console.error('Erro ao exportar CSV:', exportError);
+                }
+            }
+
             clearTimeout(timeout);
             const progressoAtual = Math.round(((currentFileIndex + 1) / arquivosParaProcessar.length) * 100);
             atualizarProgresso(progressoAtual, `Erro: ${error.message}`);
 
-            // Registrar erro no log se ainda não foi registrado
             if (!registroLogs.some(log => log.arquivo === fileInfo.fileName && log.mensagem === error.message)) {
                 registrarLog(
                     fileInfo.fileName,
@@ -1024,19 +1170,42 @@
     }
 
     // Função única de finalização do processo
-    function finalizarProcesso(iframe, erro = false) {
-        if (iframe && iframe.parentNode) {
-            iframe.parentNode.removeChild(iframe);
+    function finalizarProcesso(iframe, exportarLogCSV = false) {
+        try {
+
+            // Habilitar elementos de interface
+            const elementos = document.querySelectorAll('.upload-control');
+            elementos.forEach(elem => {
+                elem.disabled = false;
+            });
+
+            if (exportarLogCSV) {
+                // Remover botão anterior se existir
+                const botaoAnterior = document.getElementById('btnDownloadCSV');
+                if (botaoAnterior) {
+                    botaoAnterior.remove();
+                }
+
+                // Criar novo botão
+                const btnDownload = document.createElement('button');
+                btnDownload.id = 'btnDownloadCSV';
+                btnDownload.innerHTML = 'Baixar Relatório CSV';
+                btnDownload.className = 'btn-download-csv';
+
+                // Inserir após o fileList
+                const fileList = document.getElementById('fileList');
+                if (fileList) {
+                    fileList.insertAdjacentElement('afterend', btnDownload);
+                }
+
+                btnDownload.addEventListener('click', exportarCSV);
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Erro ao finalizar processo:', error);
+            return false;
         }
-
-        // Atualizar progresso antes de continuar
-        const progressoAtual = Math.round(((currentFileIndex + 1) / arquivosParaProcessar.length) * 100);
-        atualizarProgresso(progressoAtual, 'Analisando próximo arquivo...');
-
-        setTimeout(() => {
-            currentFileIndex++;
-            processarProximoArquivo();
-        }, erro ? 3000 : 1000);
     }
 
     // Função auxiliar de espera
@@ -1108,7 +1277,7 @@
     }
 
     // Função para atualizar o status visual do item na lista
-    function atualizarStatusArquivo(fileName, status) {
+    async function atualizarStatusArquivo(fileName, status) {
         const fileItems = document.querySelectorAll('.fileItem');
         for (const item of fileItems) {
             if (item.textContent.includes(fileName)) {
@@ -1121,6 +1290,7 @@
                 } else if (status === 'erro') {
                     item.classList.add('failure');
                 }
+                await esperar(500);
                 break;
             }
         }
@@ -1151,7 +1321,7 @@
         ];
     }
 
-    // Função para exportar CSV
+    // Função para gerar e baixar CSV
     function exportarCSV() {
         const relatorio = gerarRelatorioEstatisticas();
         let csv = '';
@@ -1190,5 +1360,47 @@
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+    }
+
+    function resetarSistema() {
+        // Reset de variáveis de controle - usando window para variáveis globais
+        window.arquivosProcessados = [];
+        window.arquivosPendentes = [];
+        window.arquivosComErro = [];
+        window.processamentoEmAndamento = false;
+        window.totalArquivos = 0;
+        window.arquivosProcessadosCount = 0;
+
+        // ou, se você já tem estas variáveis declaradas em algum lugar com let/var:
+        arquivosProcessados.length = 0;  // limpa o array mantendo a referência
+        arquivosPendentes.length = 0;
+        arquivosComErro.length = 0;
+        isProcessing = false;
+        processamentoEmAndamento = false;
+
+        // Reset de interface
+        atualizarProgresso(0, 'Sistema pronto');
+
+        // Limpar área de upload
+        const dropZone = document.getElementById('drop-zone');
+        if (dropZone) {
+            dropZone.innerHTML = 'Arraste os arquivos aqui ou clique para selecionar';
+            dropZone.classList.remove('processing', 'error', 'success');
+        }
+
+        // Reset do gerenciador de logs
+        if (typeof logManager !== 'undefined' && logManager) {
+            logManager.init();
+        }
+
+        // Habilitar controles
+        document.querySelectorAll('.upload-control').forEach(elem => {
+            elem.disabled = false;
+        });
+
+        // Limpar qualquer estado pendente
+        if (window.timeoutProcessamento) {
+            clearTimeout(window.timeoutProcessamento);
+        }
     }
 })();
