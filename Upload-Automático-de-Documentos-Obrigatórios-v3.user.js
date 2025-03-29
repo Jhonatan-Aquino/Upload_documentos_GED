@@ -27,345 +27,367 @@ window.processamentoEmAndamento = false;
 
     // Estilos CSS personalizados (mantidos os mesmos) TESTANDO A VERSAO 4.0
     GM_addStyle(`
-    #creditoUAD .botaoUAD {
-        background: #ebebeb;
-        backdrop-filter: blur(6px);
-        border-radius: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        color: #087eff;
-        font-size: 13px;
-        font-weight: normal;
-        padding: 9px 20px;
-        min-width: 124.5px;
-        margin: 5px;
-        text-decoration: none;
-        transition: all 0.15s ease-in-out;
-        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
-    }
-   #creditoUAD label.botaoUAD {
-        background-color: transparent;
-        color: #3982f7;
-        border: 1px solid #3982f7;
-        box-shadow: none;
-    }
-   #creditoUAD label.botaoUAD:hover {
-        background: #3982f7;
-        transform: scale(1.02);
-        color: #fff;
-    }
-   #creditoUAD #btnIniciarProcesso {
-        background: #3982f7;
-        color: #fff;
-    }
-  #creditoUAD  #btnIniciarProcesso:hover {
-        background: #3982f7;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        opacity:0.9;
-        color: #fff;
-    }
+           /* Estilos base do container principal */
+        #containerUAD {
+            background: rgba(220, 220, 220, 0.58);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(6.6px);
+            -webkit-backdrop-filter: blur(6.6px);
+            border: 1px solid rgba(214, 214, 214, 0.27);
+            border-radius: 20px;
+            color: #474e68;
+            width: auto;
+            text-align: center;
+            font-weight: bold;
+            position: fixed;
+            z-index: 2002;
+            padding: 15px;
+            bottom: 33px;
+            left: 30px;
+            height: auto;
+            min-width: 350px;
+        }
 
-   #creditoUAD #btnDownloadCSV {
-        background-color: rgba(255, 255, 255, 0.2);
-        color: #474e68;
-        box-shadow: none;
-    }
+        /* Estilos gerais dentro do container */
+        #containerUAD * {
+            font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
+        }
 
-    /* Remove efeitos de hover e shadow */
-  #creditoUAD  #btnDownloadCSV:hover {
-        background-color: #f5f5f5; /* cinza bem claro em vez de azul */
-    }
+        #containerUAD a {
+            color: #666 !important;
+        }
 
-  #creditoUAD  #fileInput {
-        display: none;
-    }
-  #creditoUAD   #fileList {
-        max-height: 200px;
-        overflow-y: auto;
-        margin: 20px 0;
-        border: 1px dashed #ccc;
-        padding: 10px;
-        border-radius: 10px;
-        scrollbar-width: none;
-    }
-  #creditoUAD  .fileItem {
-        margin: 3px 0;
-        padding: 7px 5px;
-        background: rgba(255,255,255,0.5);
-        border-radius: 5px;
-        font-weight:normal;
-        text-align:left;
-    }
-  #creditoUAD  .fileItem.error {
-        background: rgba(255,200,200,0.7);
-    }
+        /* Estilo base do botão UAD */
+        #containerUAD .botaoUAD {
+            background: #ebebeb;
+            backdrop-filter: blur(6px);
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #087eff;
+            font-size: 13px;  /* Padronizado para 12px */
+            font-weight: normal;
+            padding: 9px 20px;
+            min-width: 124.5px;
+            margin: 5px;
+            text-decoration: none;
+            transition: all 0.15s ease-in-out;
+        }
 
-   #creditoUAD .divlog {
-        background: rgba(244, 244, 244, 0.58);
-        border-radius: 16px;
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0);
-        backdrop-filter: blur(6.6px);
-        -webkit-backdrop-filter: blur(6.6px);
-        border: 1px solid rgba(214, 214, 214, 0.27);
-        color: #000;
-        width: auto;
-        text-align: center;
-        font-weight: bold;
-        position: absolute;
-        z-index: 2002;
-        padding: 5px 15px;
-        bottom: 103%;
-        min-height: 25px;
-        min-width: 340px;
-        color: #087eff;
-        font-size: 14px;
-        font-weight: normal;
-        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
-        line-height: 25px;
-        display: none;
-    }
-    #creditoUAD {
-        background: rgba(220, 220, 220, 0.58);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(6.6px);
-        -webkit-backdrop-filter: blur(6.6px);
-        border: 1px solid rgba(214, 214, 214, 0.27);
-        border-radius: 20px;
-        color: #474e68;
-        width: auto;
-        text-align: center;
-        font-weight: bold;
-        position: fixed;
-        z-index: 2002;
-        padding: 15px;
-        bottom:33px;
-        left: 30px;
-        height: auto;
-        min-width:350px;
-    }
-    #exibirUAD {
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(20px);
-        font-weight: 500;
-        letter-spacing: 0.3px;
-        padding: 5px 15px;
-    }
-    #exibirUAD:hover {
-        background: rgba(0, 0, 0, 0.9);
-    }
-   #creditoUAD #loadingBtn {
-        position: relative;
-        padding: 15px 20px;
-        font-size: 14px;
-        background: none;
-        color: #087dff;
-        cursor: pointer;
-        border-radius: 5px;
-        overflow: hidden;
-        border: none;
-        width: 100%;
-        margin-top: 10px;
-        display: none; /* Inicialmente oculto */
-    }
-   #creditoUAD #loadingBtn.loading::after {
-        content: "";
-        position: absolute;
-        width: 56px;
-        height: 56px;
-        border: 3px solid #087dff;
-        border-top-color: transparent;
-        border-radius: 50%;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        animation: spin 1.8s linear infinite;
-    }
-    @keyframes spin {
-        from { transform: translate(-50%, -50%) rotate(0deg); }
-        to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-  #creditoUAD  #uploadFrame {
-        width: 1200px;
-        height: 900px;
-        border: none;
-        position: fixed;
-        left: 0px;
-        bottom: 0px;
-        z-index: 9999;
-        display: none;
-        visibility: hidden;
-    }
-  #creditoUAD  #progressArea {
-        width: 100%;
-        margin: 10px 0;
-        display: none;
-    }
+        /* Variação para labels */
+        #containerUAD label.botaoUAD {
+            background-color: transparent;
+            color: #3982f7;
+            border: 1px solid #3982f7;
+        }
 
-   #creditoUAD  .progress-container {
-        width: 100%;
-        margin: 10px 0;
-        display: none;
-    }
+        #containerUAD label.botaoUAD:hover {
+            background: #3982f7;
+            transform: scale(1.02);
+            color: #fff;
+        }
 
-  #creditoUAD  .progress-bar-wrapper {
-        width: 100%;
-        background-color: #f0f0f0;
-        border-radius: 10px;
-        padding: 3px;
-        margin-bottom: 8px;
-        overflow: hidden;
-    }
+        /* Botão de ação principal */
+        #containerUAD #btnIniciarProcesso {
+            background: #3982f7;
+            color: #fff;
+            border: none;
+        }
 
-   #creditoUAD .progress-bar {
-        height: 5px;
-        background-color: #4BB543;
-        border-radius: 8px;
-        width: 0%;
-        transition: width 0.5s ease-in-out;
-        position: relative;
-        overflow: hidden;
-    }
+        #containerUAD #btnIniciarProcesso:hover {
+            background: #3982f7;
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
 
-    /* Efeito de brilho */
-  #creditoUAD  .progress-bar::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.4),
-            transparent
-        );
-        animation: glowingEffect 2s infinite linear;
-    }
+        /* Botão secundário */
+        #containerUAD #btnDownloadCSV {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #474e68;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
 
-    @keyframes glowingEffect {
-        0% {
+        #containerUAD #btnDownloadCSV:hover {
+            background-color: #f5f5f5;
+            transform: scale(1.02);
+        }
+
+        /* Estilos da área de arquivo */
+        #containerUAD #fileInput {
+            display: none;
+        }
+
+        #containerUAD #fileList {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            scrollbar-width: none;
+        }
+
+        #containerUAD .fileItem {
+            margin: 3px 0;
+            padding: 7px 5px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+            font-weight: normal;
+            text-align: left;
+        }
+
+        #containerUAD .fileItem.error {
+            background: rgba(255,200,200,0.7);
+        }
+
+        #containerUAD .fileItem.success {
+            background: rgb(126, 213, 126) !important;
+            transition: background-color 0.3s ease;
+        }
+
+        #containerUAD .fileItem.failure {
+            background: rgb(227, 122, 122) !important;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Estilos da div de log */
+        #containerUAD .divlog {
+            background: rgba(244, 244, 244, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0);
+            backdrop-filter: blur(6.6px);
+            -webkit-backdrop-filter: blur(6.6px);
+            border: 1px solid rgba(214, 214, 214, 0.27);
+            color: #087eff;
+            width: auto;
+            text-align: center;
+            position: absolute;
+            z-index: 2002;
+            padding: 5px 15px;
+            bottom: 103%;
+            min-height: 25px;
+            min-width: 340px;
+            font-size: 14px;
+            font-weight: normal;
+            line-height: 25px;
+            display: none;
+        }
+
+        /* Estilos do botão de exibir */
+        #exibirUAD {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 5px 15px;
+        }
+
+        #exibirUAD:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Estilos do botão de loading */
+        #containerUAD #loadingBtn {
+            position: relative;
+            padding: 15px 20px;
+            font-size: 14px;
+            background: none;
+            color: #087dff;
+            cursor: pointer;
+            border-radius: 5px;
+            overflow: hidden;
+            border: none;
+            width: 100%;
+            margin-top: 10px;
+            display: none;
+        }
+
+        #containerUAD #loadingBtn.loading::after {
+            content: "";
+            position: absolute;
+            width: 56px;
+            height: 56px;
+            border: 3px solid #087dff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 1.8s linear infinite;
+        }
+
+        /* Estilos do iframe de upload */
+        #containerUAD #uploadFrame {
+            width: 1200px;
+            height: 900px;
+            border: none;
+            position: fixed;
+            left: 0px;
+            bottom: 0px;
+            z-index: 9999;
+            display: none;
+            visibility: hidden;
+        }
+
+        /* Estilos da área de progresso */
+        #containerUAD #progressArea {
+            width: 100%;
+            margin: 10px 0;
+            display: none;
+        }
+
+        #containerUAD .progress-container {
+            width: 100%;
+            margin: 10px 0;
+            display: none;
+        }
+
+        #containerUAD .progress-bar-wrapper {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        #containerUAD .progress-bar {
+            height: 5px;
+            background-color: #4BB543;
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #containerUAD .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0;
             left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: glowingEffect 2s infinite linear;
         }
-        100% {
-            left: 100%;
+
+        #containerUAD .progress-text {
+            text-align: center;
+            color: #474e68;
+            font-size: 12px;
+            font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif;
+            padding: 5px 0;
+            font-weight: normal;
         }
-    }
 
-   #creditoUAD .progress-text {
-        text-align: center;
-        color: #474e68;
-        font-size: 12px;
-        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif;
-        padding: 5px 0;
-        font-weight:normal;
-    }
+        /* Estilos do seletor e ajuda */
+        #containerUAD .divseletor {
+            padding: 0;
+            text-align: center;
+            min-width: 460px;
+        }
 
-   #creditoUAD .divseletor {
-        padding: 0;
-        text-align: center;
-        min-width: 460px;
-    }
+        #containerUAD .divseletor h3 {
+            font-size: 28px !important;
+            font-weight: 500 !important;
+            margin-bottom: 15px;
+            color: #1d1d1f;
+            letter-spacing: -0.5px;
+        }
 
-   #creditoUAD .divseletor h3 {
-        font-size: 28px !important;
-        font-weight: 500 !important;
-        margin-bottom: 15px;
-        color: #1d1d1f;
-        letter-spacing: -0.5px;
-    }
+        #containerUAD .divseletor p {
+            font-size: 8pt !important;
+            color: rgb(71, 78, 104);
+            line-height: 1.5;
+            margin-bottom: 20px !important;
+        }
 
-    #creditoUAD .divseletor p {
-        font-size: 8pt !important;
-        color: #86868b;
-        line-height: 1.5;
-        margin-bottom: 20px !important;
-    }
+        #containerUAD .divseletor p em {
+            color: #2997ff;
+            font-style: normal;
+            font-weight: 500;
+        }
 
-  #creditoUAD  .divseletor p em {
-        color: #2997ff;
-        font-style: normal;
-        font-weight: 500;
-    }
+        #containerUAD .divajuda {
+            display: none;
+            max-width: 460px;
+            max-height: 700px;
+            overflow: hidden;
+            line-height: 20px;
+            font-size: 11px;
+            font-weight: normal;
+            text-align: justify;
+        }
 
-   #creditoUAD .divajuda {
-        display: none;
-        max-width: 460px;
-        max-height: 700px;
-        overflow: hidden;
-        line-height: 20px;
-        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
-        font-size: 11px;
-        font-weight: normal;
-        text-align: justify;
-    }
+        /* Estilos SVG e botões de controle */
+        #containerUAD svg:hover path {
+            fill: #087dff !important;
+        }
 
-  #creditoUAD  svg:hover path {
-        fill: #087dff !important;
-    }
+        #containerUAD .btnscontrole {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
 
-   #creditoUAD .btnscontrole {
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-    }
+        #containerUAD .btnscontrole:hover path {
+            fill: #087dff !important;
+        }
 
- #creditoUAD   .btnscontrole:hover path {
-        fill: #087dff !important;
-    }
+        /* Estilos da tabela */
+        #containerUAD .tabela-docs {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 15px 0;
+            font-size: 11px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
 
-  #creditoUAD  .tabela-docs {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin: 15px 0;
-        font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;
-        font-size: 11px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 8px;
-        overflow: hidden;
-    }
+        #containerUAD .tabela-docs td {
+            padding: 8px 10px;
+            vertical-align: top;
+            line-height: 1.4;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
 
-  #creditoUAD  .tabela-docs td {
-        padding: 8px 10px;
-        vertical-align: top;
-        line-height: 1.4;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    }
+        #containerUAD .tabela-docs tr:last-child td {
+            border-bottom: none;
+        }
 
-  #creditoUAD  .tabela-docs tr:last-child td {
-        border-bottom: none;
-    }
+        #containerUAD .tabela-docs td:first-child {
+            width: 30px;
+            text-align: right;
+            color: #666;
+            font-weight: normal;
+        }
 
-   #creditoUAD .tabela-docs td:first-child {
-        width: 30px;
-        text-align: right;
-        color: #666;
-        font-weight: normal;
-    }
+        #containerUAD .tabela-docs tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.01);
+        }
 
-  #creditoUAD  .tabela-docs tr:nth-child(even) {
-        background-color: rgba(0, 0, 0, 0.01);
-    }
+        #containerUAD .tabela-docs tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
 
-  #creditoUAD  .tabela-docs tr:hover {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
+        /* Animações */
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
 
- #creditoUAD   .fileItem.success {
-        background: rgb(126, 213, 126) !important;
-        transition: background-color 0.3s ease;
-    }
-
-  #creditoUAD  .fileItem.failure {
-        background: rgb(227, 122, 122) !important;
-        transition: background-color 0.3s ease;
-    }
+        @keyframes glowingEffect {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
     `);
 
     // Função para criar a interface do usuário
     function criarInterface() {
         // Primeiro, remover quaisquer instâncias existentes
-        const elementosExistentes = document.querySelectorAll('#creditoUAD, #exibirUAD');
+        const elementosExistentes = document.querySelectorAll('#containerUAD, #exibirUAD');
         elementosExistentes.forEach(el => el.remove());
 
         console.log('Criando interface...'); // Debug
@@ -395,13 +417,13 @@ window.processamentoEmAndamento = false;
 
         // Criar div principal
         const divCredit = document.createElement('div');
-        divCredit.id = 'creditoUAD';
+        divCredit.id = 'containerUAD';
         divCredit.className = 'menuSCT';
 
         // Configurar conteúdo
         divCredit.innerHTML = `
             <div class="divlog" id="divlog"></div>
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" title="Voltar" version="1.1" class="btnscontrole" width="20" height="20" style="display:none; float:left;margin: -6px;" id="btnvoltar" viewBox="0 0 256 256" xml:space="preserve">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" title="Voltar" version="1.1" class="btnscontrole" width="20" height="20" style=" margin: 10px;position: absolute;left: 0; bottom: 0; display:none" id="btnvoltar" viewBox="0 0 256 256" xml:space="preserve">
                 <defs></defs>
                 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
                     <path d="M 4 49 h 82 c 2.209 0 4 -1.791 4 -4 s -1.791 -4 -4 -4 H 4 c -2.209 0 -4 1.791 -4 4 S 1.791 49 4 49 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: #666; fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
@@ -409,7 +431,7 @@ window.processamentoEmAndamento = false;
                 </g>
             </svg>
             <div class="divseletor">
-                <h3 style="font-size:15pt;font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important;">Upload Automático de Documentos</h3>
+                <h3>Upload Automático de Documentos</h3>
                 <p style="font-size: 10pt; font-family: 'SF Pro Text','SF Pro Icons','Helvetica Neue','Helvetica','Arial',sans-serif !important; font-weight: normal; margin-top: -15px;margin-bottom: 40px;">
                     Selecione os arquivos para upload!<br>
                     Exemplo: <em>1937175-3.pdf</em>
@@ -482,14 +504,14 @@ window.processamentoEmAndamento = false;
                 - Em caso de erro, verifique a mensagem no log<br>
                 - O relatório final mostrará detalhes de cada upload</p>
             </div>
-            <div class="creditoUAD" style="color: #474e68;">
+            <div class="containerUAD" style="color: #474e68;">
                 <div>
                     <span style='font-size:8pt;font-weight:normal;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'><a href="https://github.com/Jhonatan-Aquino/" target="_blank" style="text-color:rgb(71, 78, 104) !important;  text-decoration: none !important;">< Jhonatan Aquino /></a></span>
                     <br>
-                    <span style='font-size:7pt;color:inherit;font-weight: normal; font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'>v${GM_info.script.version}</span>
+                    <span style='color:inherit;font-weight: normal; font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'>Upload Automático de Documentos v${GM_info.script.version}</span>
                 </div>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" title="Ajuda" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20" height="20" class="btnajuda" id="btnajuda" viewBox="0 0 256 256" style="float:left;margin: -6px;" xml:space="preserve">
+            <svg xmlns="http://www.w3.org/2000/svg" title="Ajuda" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="20" height="20" class="btnajuda" id="btnajuda" viewBox="0 0 256 256" style=" margin: 10px;position: absolute;left: 0; bottom: 0;" xml:space="preserve">
                 <defs></defs>
                 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
                     <path d="M 45 58.88 c -2.209 0 -4 -1.791 -4 -4 v -4.543 c 0 -1.101 0.454 -2.153 1.254 -2.908 l 8.083 -7.631 c 1.313 -1.377 2.035 -3.181 2.035 -5.087 v -0.302 c 0 -2.005 -0.791 -3.881 -2.228 -5.281 c -1.436 -1.399 -3.321 -2.14 -5.342 -2.089 c -3.957 0.102 -7.175 3.523 -7.175 7.626 c 0 2.209 -1.791 4 -4 4 s -4 -1.791 -4 -4 c 0 -8.402 6.715 -15.411 14.969 -15.623 c 4.183 -0.109 8.138 1.439 11.131 4.357 c 2.995 2.918 4.645 6.829 4.645 11.01 v 0.302 c 0 4.027 -1.546 7.834 -4.354 10.72 c -0.04 0.041 -0.08 0.081 -0.121 0.12 L 49 52.062 v 2.818 C 49 57.089 47.209 58.88 45 58.88 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: #a5a5a5; fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
@@ -508,14 +530,14 @@ window.processamentoEmAndamento = false;
         btnExibir.onmouseout = () => btnExibir.style.backgroundColor = "#474e68";
         btnExibir.onclick = function() {
             const novoEstado = this.value === "MINIMIZAR" ? "fechado" : "aberto";
-            $("#creditoUAD").slideToggle();
+            $("#containerUAD").slideToggle();
             this.value = novoEstado === "fechado" ? "ABRIR | Upload de documentos" : "MINIMIZAR";
             setCookie('estadoMenu', novoEstado, 30);
         };
 
         // Configurar visibilidade inicial
         if (estadoSalvo === 'fechado') {
-            $("#creditoUAD").hide();
+            $("#containerUAD").hide();
         }
 
         // Adicionar eventos da ajuda
