@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.3.3
+// @version       4.3.4
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -14,6 +14,7 @@
 // @updateURL     https://raw.githubusercontent.com/Jhonatan-Aquino/Upload_documentos_GED/main/Upload-Automático-de-Documentos-Obrigatórios-v3.user.js
 // @downloadURL   https://raw.githubusercontent.com/Jhonatan-Aquino/Upload_documentos_GED/main/Upload-Automático-de-Documentos-Obrigatórios-v3.user.js
 // ==/UserScript==
+
 
 
 
@@ -129,7 +130,7 @@ window.processamentoEmAndamento = false;
 
         #containerUAD .fileItem {
             margin: 3px 0;
-            padding: 7px 5px;
+            padding: 7px;
             background: rgba(255,255,255,0.5);
             border-radius: 5px;
             font-weight: normal;
@@ -599,7 +600,7 @@ window.processamentoEmAndamento = false;
             if (hasErrors) {
                 exibirLog('Alguns arquivos têm problemas. Corrija antes de continuar.', 5000, '#FF4B40');
             } else if (arquivosParaProcessar.length > 0) {
-                exibirLog(`Pronto para processar ${arquivosParaProcessar.length} arquivos válidos.`, 3000, '#4BB543');
+                exibirLog(`Pronto para processar ${arquivosParaProcessar.length} arquivos válidos.`, 3000, '#34A568');
                 document.getElementById('btnIniciarProcesso').style.display = 'inline-block';
                 document.getElementById('progressArea').style.display = 'block';
             }
@@ -1092,7 +1093,7 @@ window.processamentoEmAndamento = false;
                         mensagemFinal
                     );
 
-                    exibirLog(mensagemFinal, CONFIG.TEMPO_ESPERA_PADRAO, ehSucesso ? '#4BB543' : ehErro ? '#FF4B40' : '#FFA500');
+                    exibirLog(mensagemFinal, CONFIG.TEMPO_ESPERA_PADRAO, ehSucesso ? '#34A568' : ehErro ? '#FF4B40' : '#FFA500');
                     processoConcluido = true;
 
                     if (ehErro) {
