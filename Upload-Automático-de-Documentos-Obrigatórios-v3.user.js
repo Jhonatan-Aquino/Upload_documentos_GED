@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Upload Automático de Documentos Obrigatórios v3
 // @namespace     http://tampermonkey.net/
-// @version       4.3.4
+// @version       4.3.5
 // @description   Automatiza o upload de documentos obrigatórios analisando nomes de arquivos (com upload real)
 // @author        Jhonatan Aquino
 // @match         https://*.sigeduca.seduc.mt.gov.br/ged/hwmconaluno.aspx*
@@ -18,7 +18,6 @@
 
 
 
-
 // No início do seu script (fora de qualquer função)
 window.arquivosPendentes = [];
 window.processamentoEmAndamento = false;
@@ -30,13 +29,13 @@ window.processamentoEmAndamento = false;
     GM_addStyle(`
            /* Estilos base do container principal */
         #containerUAD {
-            background: rgba(220, 220, 220, 0.58);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(6.6px);
+            background:rgba(237, 237, 237, 0.75);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
             -webkit-backdrop-filter: blur(6.6px);
-            border: 1px solid rgba(214, 214, 214, 0.27);
+            backdrop-filter: blur(6.6px);
+            border:1px solid rgba(214, 214, 214, 0.47);
             border-radius: 20px;
-            color: #474e68;
+            color: #293254;
             width: auto;
             text-align: center;
             font-weight: bold;
@@ -44,7 +43,7 @@ window.processamentoEmAndamento = false;
             z-index: 2002;
             padding: 15px;
             bottom: 33px;
-            left: 30px;
+            left: 42px;
             height: auto;
             min-width: 350px;
         }
@@ -104,7 +103,7 @@ window.processamentoEmAndamento = false;
         /* Botão secundário */
         #containerUAD #btnDownloadCSV {
             background-color: rgba(255, 255, 255, 0.2);
-            color: #474e68;
+            color: #293254;
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
@@ -153,7 +152,7 @@ window.processamentoEmAndamento = false;
 
         /* Estilos da div de log */
         #containerUAD .divlog {
-            background: rgba(244, 244, 244, 0.8);
+            background: rgba(244, 244, 244, 0.58);
             border-radius: 16px;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0);
             backdrop-filter: blur(6.6px);
@@ -164,14 +163,16 @@ window.processamentoEmAndamento = false;
             text-align: center;
             position: absolute;
             z-index: 2002;
-            padding: 5px 15px;
-            bottom: 103%;
+            padding: 5px;
+            top: -5px;
             min-height: 25px;
             min-width: 340px;
             font-size: 14px;
             font-weight: normal;
             line-height: 25px;
             display: none;
+            margin-left: -10px;
+            transform: translateY(-100%);
         }
 
         /* Estilos do botão de exibir */
@@ -275,7 +276,7 @@ window.processamentoEmAndamento = false;
 
         #containerUAD .progress-text {
             text-align: center;
-            color: #474e68;
+            color: #293254;
             font-size: 12px;
             font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif;
             padding: 5px 0;
@@ -398,7 +399,7 @@ window.processamentoEmAndamento = false;
         btnExibir.type = 'button';
         btnExibir.id = 'exibirUAD';
         btnExibir.className = 'menuSCT';
-        btnExibir.style.backgroundColor = "#474e68";
+        btnExibir.style.backgroundColor = "#293254";
         btnExibir.style.color = "#ffffff";
         btnExibir.style.fontSize = "12px";
         btnExibir.style.border = "none";
@@ -407,7 +408,7 @@ window.processamentoEmAndamento = false;
         btnExibir.style.position = "fixed";
         btnExibir.style.zIndex = "2002";
         btnExibir.style.bottom = "1px";
-        btnExibir.style.left = "30px";
+        btnExibir.style.left = "42px";
         btnExibir.style.cursor = "pointer";
         btnExibir.style.transition = "background-color 0.1s ease-in-out";
         btnExibir.style.borderRadius = "15px";
@@ -505,7 +506,7 @@ window.processamentoEmAndamento = false;
                 - Em caso de erro, verifique a mensagem no log<br>
                 - O relatório final mostrará detalhes de cada upload</p>
             </div>
-            <div class="containerUAD" style="color: #474e68;">
+            <div class="containerUAD" style="color: #293254;">
                 <div>
                     <span style='font-size:8pt;font-weight:normal;font-family: "SF Pro Text","SF Pro Icons","Helvetica Neue","Helvetica","Arial",sans-serif !important;'><a href="https://github.com/Jhonatan-Aquino/" target="_blank" style="text-color:rgb(71, 78, 104) !important;  text-decoration: none !important;">< Jhonatan Aquino /></a></span>
                     <br>
@@ -528,7 +529,7 @@ window.processamentoEmAndamento = false;
 
         // Configurar eventos
         btnExibir.onmouseover = () => btnExibir.style.backgroundColor = "#3982F7";
-        btnExibir.onmouseout = () => btnExibir.style.backgroundColor = "#474e68";
+        btnExibir.onmouseout = () => btnExibir.style.backgroundColor = "#293254";
         btnExibir.onclick = function() {
             const novoEstado = this.value === "MINIMIZAR" ? "fechado" : "aberto";
             $("#containerUAD").slideToggle();
